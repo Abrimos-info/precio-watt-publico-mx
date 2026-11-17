@@ -29,7 +29,7 @@ Los valores booleanos se escriben `TRUE` o `FALSE`. Los montos están en pesos m
 | `capacidad_watts` | Capacidad total en watts, solo para componentes o sistemas fotovoltaicos que la declaran. |
 | `monto_con_iva_mxn` | Monto del contrato o de la partida con IVA. |
 | `monto_sin_iva_mxn` | El mismo monto sin IVA. |
-| `precio_unitario_con_iva_mxn` | Monto con IVA entre `capacidad_watts` cuando hay watts, o entre `cantidad` en los demás casos. |
+| `precio_unitario_con_iva_mxn` | Precio unitario con IVA del bien o servicio de la fila: por watt cuando hay `capacidad_watts`, si no por unidad de `unidad_medida`. Ver «Precio unitario y monto». |
 | `precio_unitario_sin_iva_mxn` | Lo mismo, sin IVA. |
 | `alcance_precio` | Qué cubre el precio unitario. Ver «Vocabularios». |
 | `categoria_compra` | Tipo de contratación: `adquisicion`, `servicios`, `obra_publica` o `servicios_relacionados_obra`. |
@@ -45,6 +45,14 @@ Los valores booleanos se escriben `TRUE` o `FALSE`. Los montos están en pesos m
 | `unidad_precio_unitario` | Unidad del precio unitario: `MXN/W` si hay `capacidad_watts`, si no `MXN/` más la unidad de medida (`MXN/pieza`, `MXN/servicio`, etcétera). |
 | `solicitud_origen` | `id` de la solicitud (en `solicitudes.csv`) cuya respuesta aportó el dato de la fila. Vacía si el dato viene de un documento publicado. |
 | `folio_solicitud_origen` | Folio de esa solicitud en la PNT. |
+
+### Precio unitario y monto
+
+`monto_*` es el monto que publica la fuente, que muchas veces es el del contrato completo. El precio unitario es el de la partida que se aisló del catálogo de conceptos, el oficio de respuesta o el contrato que citan `como_verificar` y `notas_metodologicas`. Solo coincide con `monto_*` entre `capacidad_watts` (o entre `cantidad`) cuando el monto es el de la propia partida. Para analizar precios hay que usar las columnas de precio unitario, no recalcularlas desde el monto.
+
+### Valores vacíos
+
+Una celda vacía significa que la fuente no publica el dato o que no aplica. Las filas sin precio unitario (170) tienen vacíos también `unidad_precio_unitario` y, en la mayoría, `alcance_precio`, y todas son no comparables. Seis filas comparables tienen solo el precio sin IVA porque la fuente o la respuesta solo lo informa sin IVA.
 
 ### Vocabularios
 
@@ -84,7 +92,7 @@ Filtrar `comparable = TRUE` evita contar dos veces un precio. Para sumar montos,
 
 | Columna | Qué contiene |
 |---|---|
-| `id` | Identificador de la solicitud (`PS-NNN`). Se cruza con `solicitud_origen` de `contratos.csv`. |
+| `id` | Identificador de la solicitud (`PS-NNN`, con una letra al final cuando es una segunda solicitud sobre el mismo caso, como `PS-052b`). Se cruza con `solicitud_origen` de `contratos.csv`. |
 | `ambito` | `Federal` o `Estatal o municipal`. |
 | `entidad_federativa` | Entidad del sujeto obligado. |
 | `institucion` | Sujeto obligado al que se dirigió la solicitud. |
@@ -96,11 +104,11 @@ Filtrar `comparable = TRUE` evita contar dos veces un precio. Para sumar montos,
 | `periodo_solicitado` | Periodo que cubre la solicitud. |
 | `contratos_citados` | Contratos o procedimientos citados en la solicitud. |
 | `n_contratos` | Número de contratos citados. |
-| `estatus` | `respondida`, `vencida_sin_respuesta`, `enviada` (en plazo al corte) o `pendiente` (no presentada). |
+| `estatus` | `respondida`, `vencida_sin_respuesta`, `enviada` (presentada y sin respuesta al corte) o `pendiente` (no presentada). Las solicitudes sin respuesta tienen vacíos `canal_respuesta`, `tipo_respuesta` y `entrega_de_precio`, salvo PS-028, que figura vencida en la PNT pero respondió por correo. |
 | `folio` | Folio de la PNT. |
 | `fecha_envio` | Fecha de presentación. |
 | `fecha_limite_respuesta` | Fecha límite de respuesta según la PNT. |
-| `estatus_pnt` | Estatus en la PNT al corte (`Terminada` o `En proceso`). |
+| `estatus_pnt` | Estatus en la PNT al corte (`Terminada` o `En proceso`). Vacío en la solicitud no presentada y en PS-052b. |
 | `fecha_respuesta` | Fecha de la respuesta. |
 | `canal_respuesta` | Vía por la que llegó la respuesta (`PNT` o `correo`). |
 | `tipo_respuesta` | `entrega_completa`, `entrega_parcial`, `remite_a_liga_publica`, `inexistencia`, `incompetencia`, `reserva_o_confidencial`, `cobro_reproduccion` u `otro`. |
@@ -114,9 +122,9 @@ Filtrar `comparable = TRUE` evita contar dos veces un precio. Para sumar montos,
 | `ruta_en_zip` | Ruta del documento dentro del zip: `origen/entidad/registro o solicitud/archivo`. |
 | `nombre_archivo` | Nombre del archivo. |
 | `origen` | `comprasmx`, `pnt_buscador` (buscador de contratos de la PNT), `portal_estatal`, `sistema6` (Plataforma Digital Estatal de Aguascalientes) o `respuesta_solicitud` (documentos entregados en respuesta a una solicitud). |
-| `id_registro` | `id_registro` de la fila de `contratos.csv` a la que corresponde el documento, si se pudo vincular. |
+| `id_registro` | `id_registro` de las filas de `contratos.csv` a las que corresponde el documento, si se pudo vincular. Un documento puede servir a varias filas: en ese caso los identificadores van separados por `\|` (por ejemplo `CMX-003\|CMX-004`). |
 | `id_solicitud` | `id` de la solicitud, para los documentos que llegaron como respuesta. |
-| `metodo_vinculo` | Cómo se vinculó el documento con la base: `carpeta_procedimiento`, `id_contrato_fuente`, `solicitud_origen`, `solicitud_contratos_ids`, `prefijo_nombre` o `sin_vinculo`. |
+| `metodo_vinculo` | Cómo se vinculó el documento con la base: `carpeta_procedimiento`, `id_contrato_fuente`, `solicitud_origen`, `solicitud_contratos_ids`, `prefijo_nombre` o `sin_vinculo` (documento sin fila de `contratos.csv`, aunque puede tener `id_solicitud`). |
 | `ext` | Extensión del archivo. |
 | `bytes` | Tamaño en bytes. |
 | `sha256` | Huella del archivo, para comprobar que no cambió. |

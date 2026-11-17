@@ -13,7 +13,7 @@ Este repositorio reúne la información con la que se construyó una base compar
 | [`datos/manifiesto_documentos.csv`](datos/manifiesto_documentos.csv) | Índice de los 1,160 documentos fuente, con el zip que los contiene, el registro o la solicitud a la que corresponden y su huella sha256. |
 | [`DICCIONARIO.md`](DICCIONARIO.md) | Qué significa cada columna, los vocabularios y las advertencias para analizar los datos. |
 
-Los **documentos fuente** (convocatorias, fallos, contratos, catálogos de conceptos y respuestas a solicitudes, 4.68 GB) están en el [release `documentos-2026-11-10`](../../releases/tag/documentos-2026-11-10), en un zip por origen:
+Los **documentos fuente** (convocatorias, fallos, contratos, catálogos de conceptos y respuestas a solicitudes, 4.68 GB sin comprimir y 4.36 GB en zip, en GB de 10^9 bytes) están en el [release `documentos-2026-11-10`](../../releases/tag/documentos-2026-11-10), en un zip por origen:
 
 | Zip | Documentos |
 |---|---|
@@ -23,7 +23,7 @@ Los **documentos fuente** (convocatorias, fallos, contratos, catálogos de conce
 | `documentos_respuesta_solicitud.zip` | 303 documentos entregados en respuesta a las solicitudes |
 | `documentos_sistema6.zip` | 1 documento de la Plataforma Digital Estatal de Aguascalientes |
 
-Para encontrar el documento de un registro, buscar su `id_registro` en `manifiesto_documentos.csv`.
+Para encontrar los documentos de un registro, buscar su `id_registro` en la columna del mismo nombre de `manifiesto_documentos.csv`. Un documento puede servir a varios registros, separados por `|`, así que conviene buscar por contenido y no por coincidencia exacta.
 
 ## Fuentes y corte
 
